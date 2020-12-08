@@ -43,66 +43,46 @@ public class UserController {
 	@PostMapping("login")
 	@ApiOperation(value = "로그인")
 	public Object login(@RequestBody User user, HttpServletResponse response) {
-		ResponseEntity entity = null;
 		User userinfo = userService.login(user);
 		String jwt = jwtUtil.createToken(user);
 		logger.debug("login");
 		if (userinfo != null) {
-			final BasicResponse result = new BasicResponse();
-			result.status = true;
-			result.data = SUCCESS;
-			result.object = userinfo;
 			response.setHeader("Token", jwt);
 			response.setHeader("Access-Control-Expose-Headers", "Token");
-			entity = new ResponseEntity<>(result, HttpStatus.OK);
+			return new ResponseEntity<User>(userinfo, HttpStatus.OK);
 		}
-		else {
-			entity = new ResponseEntity<String>("로그인 정보 에러", HttpStatus.NOT_FOUND);
-		}
-		return entity;
+		return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
 	}
 	
 	@PostMapping("signup")
 	@ApiOperation(value = "회원가입")
-	public ResponseEntity<BasicResponse> signup(@RequestBody User user) {
+	public ResponseEntity<String> signup(@RequestBody User user) {
 		String id = user.getId();
 		User check = userService.getUserById(id);
 		logger.debug("signup");
-		BasicResponse result = new BasicResponse();
 		if (check != null) {
-			result.status = false;
-			result.data = "id";
-			return new ResponseEntity<BasicResponse>(result, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>(FAIL, HttpStatus.BAD_REQUEST);
 		}
 		if (userService.insert(user)) {
-			result.status = true;
-			result.data = SUCCESS;
-			return new ResponseEntity<BasicResponse>(result, HttpStatus.OK);
+			return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
 		}
-		result.status = false;
-		result.data = FAIL;
-		return new ResponseEntity<BasicResponse>(result, HttpStatus.NOT_FOUND);			
+		return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);			
 	}
 	
-//	@GetMapping("{userno}")
-//	public ResponseEntity<BasicResponse> userDetail(@PathVariable int userno) {
-//		BasicResponse result = new BasicResponse();
-//		return new ResponseEntity<BasicResponse>(result, HttpStatus.BAD_REQUEST);
-//	}
+	@GetMapping("logout")
+	@ApiOperation(value = "로그아웃")
+	public ResponseEntity<String> logout(HttpServletResponse response) {
+		response.setHeader("Token", "");
+		return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
+	}
 	
 	@PutMapping("{userno}")
 	@ApiOperation(value = "회원정보 수정")
-	public ResponseEntity<BasicResponse> updateUser(@RequestBody User user) {
-		BasicResponse result = new BasicResponse();
+	public Object updateUser(@RequestBody User user) {
 		if (userService.update(user)) {
 			User userinfo = userService.getUserByUserno(user.getUserno());
-			result.status = true;
-			result.data = SUCCESS;
-			result.object = userinfo; 
-			return new ResponseEntity<BasicResponse>(result, HttpStatus.OK);
+			return new ResponseEntity<User>(userinfo, HttpStatus.OK);
 		}
-		result.status = false;
-		result.data = FAIL; 
-		return new ResponseEntity<BasicResponse>(result, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<String>(FAIL, HttpStatus.BAD_REQUEST);
 	}
 }
