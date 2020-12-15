@@ -14,18 +14,24 @@
 		select *
 		from board
 		where boardno = #{boardno}
+	</select>
+	
+	<select id="getBoardnoByBoard" resultType="Integer">
+		select boardno
+		from board
+		where userno = #{userno} and title = #{title} and content = #{content} and date = #{date}
 	</select>	
 
 	<insert id="insert">
 		insert into board (userno, title, content, date)
-		values (#{userno}, #{title}, #{content}, now())
+		values (#{userno}, #{title}, #{content}, #{date})
 	</insert>
 	
 	<update id="update">
 		update board
 		set title = #{title},
 		content = #{content},
-		date = now()
+		date = #{date}
 		where boardno = #{boardno}
 	</update>
 	

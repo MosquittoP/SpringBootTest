@@ -10,6 +10,7 @@ import com.web.test.model.Board;
 public interface BoardDAO {
 	List<Board> getBoard();
 	Board getBoardByBoardno(int boardno);
+	int getBoardnoByBoard(Board board);
 	int insert(Board board);
 	int update(Board board);
 	int delete(int boardno);
