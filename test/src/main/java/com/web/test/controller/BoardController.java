@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -18,6 +20,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -56,6 +60,9 @@ public class BoardController {
 	
 	@Autowired
 	UserService userService;
+	
+	@Autowired
+	ResourceLoader resourceLoader;
 	
 	@GetMapping
 	@ApiOperation(value = "모든 게시글 목록 조회")
@@ -153,10 +160,10 @@ public class BoardController {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-				return new ResponseEntity<String> (SUCCESS, HttpStatus.OK);
 			}
+			return new ResponseEntity<String> (SUCCESS, HttpStatus.OK);
 		}
-			return new ResponseEntity<String> (FAIL, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<String> (FAIL, HttpStatus.BAD_REQUEST);
 	}
 	
 	@GetMapping("{boardno}")
@@ -212,7 +219,6 @@ public class BoardController {
 				FileOutputStream stream = new FileOutputStream(file);
 				try {
 					workbook.write(stream);
-					stream.close();
 					workbook.close();
 					stream.close();
 				} catch (IOException e) {
@@ -233,6 +239,36 @@ public class BoardController {
 		if (boardService.delete(boardno))
 			return new ResponseEntity<String> (SUCCESS, HttpStatus.OK);
 		return new ResponseEntity<String> (FAIL, HttpStatus.BAD_REQUEST);
+	}
+	
+	@GetMapping("download")
+	@ApiOperation(value = "게시글 파일 다운로드")
+	public Object downloadBoard(HttpServletResponse response) throws Exception {
+		logger.debug("downloadBoard");
+		File file = new File("board.xlsx");
+		if (file.exists()) {
+			InputStream inp;
+			try {
+				inp = new FileInputStream(file);
+				try {
+					workbook = new XSSFWorkbook(inp);					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			FileOutputStream stream = new FileOutputStream(file);
+			workbook.write(stream);
+			workbook.close();
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+			response.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
+//			response.setHeader("Content-Type", "application/vnd.ms-excel; charset=UTF-8");
+			response.setHeader("Content-Transfer-Encoding", "binary");
+			return new ResponseEntity<FileOutputStream>(stream, HttpStatus.OK);
+		}
+		else
+			return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
 	}
 	
 }

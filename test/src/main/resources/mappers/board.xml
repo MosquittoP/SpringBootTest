@@ -38,7 +38,7 @@
 	<delete id="delete">
 		delete
 		from board
-		where boardno = #{boardno}
+		where boardno = #{boardno};
 	</delete>
 	
 </mapper>
