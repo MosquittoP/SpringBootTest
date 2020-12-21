@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -243,32 +245,43 @@ public class BoardController {
 	
 	@GetMapping("download")
 	@ApiOperation(value = "게시글 파일 다운로드")
-	public Object downloadBoard(HttpServletResponse response) throws Exception {
+	public Object downloadBoard(HttpServletResponse response) {
 		logger.debug("downloadBoard");
 		File file = new File("board.xlsx");
 		if (file.exists()) {
-			InputStream inp;
+			InputStream inp = null;
 			try {
 				inp = new FileInputStream(file);
 				try {
-					workbook = new XSSFWorkbook(inp);					
+					workbook = new XSSFWorkbook(inp);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			FileOutputStream stream = new FileOutputStream(file);
-			workbook.write(stream);
-			workbook.close();
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
-			response.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=UTF-8");
-//			response.setHeader("Content-Type", "application/vnd.ms-excel; charset=UTF-8");
-			response.setHeader("Content-Transfer-Encoding", "binary");
-			return new ResponseEntity<FileOutputStream>(stream, HttpStatus.OK);
+//			response.setContentType("application/msexcel");
+//			response.setHeader("Content-Type", "application/octet-stream");
+			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+			response.setContentLength((int) file.length());
+			response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
+			try {
+				FileCopyUtils.copy(inp, response.getOutputStream());
+				response.flushBuffer();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+//			try {
+//				response.setHeader("Content-Disposition", "attachment; filename=\"" + java.net.URLEncoder.encode(file.getName(), "UTF-8") + "\";charset=\"UTF-8\"");
+//			} catch (UnsupportedEncodingException e) {
+//				e.printStackTrace();
+//			}
+//			response.setHeader("Content-Disposition", "JSP Generated Data");
+//			response.setHeader("Content-Type", "application/vnd.ms-excel");
+//			response.setHeader("Content-Transfer-Encoding", "binary");
+			return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
 		}
-		else
-			return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
+		return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
 	}
 	
 }
