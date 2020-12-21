@@ -44,4 +44,9 @@ public class UserServiceImpl implements UserService {
 		return userDao.getUserById(id);
 	}
 
+	@Override
+	public boolean resetPw(User user) {
+		return userDao.resetPw(user) == 1;
+	}
+
 }

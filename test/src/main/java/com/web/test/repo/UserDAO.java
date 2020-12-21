@@ -17,5 +17,5 @@ public interface UserDAO {
 	List<User> selectUser();
 	int update(User user);
 	User getUserById(String id);
-	
+	int resetPw(User user);
 }

@@ -11,4 +11,5 @@ public interface UserService {
 	List<User> selectUser();
 	boolean update(User user);
 	User getUserById(String id);
+	boolean resetPw(User user);
 }
