@@ -98,7 +98,7 @@ public class UserController {
 		return new ResponseEntity<String>(FAIL, HttpStatus.BAD_REQUEST);
 	}
 	
-	@PutMapping("")
+	@PutMapping("pwfind")
 	@ApiOperation(value = "비밀번호 찾기")
 	public Object resetPw(@RequestBody User user) {
 		String tmp = "";

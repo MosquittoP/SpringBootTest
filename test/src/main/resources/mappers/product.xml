@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.web.test.repo.ProductDAO">
+	
+	<select id="getProduct" resultType="Product">
+		select *
+		from product
+	</select>
+	
+	<select id="getProductByProductno" resultType="Product">
+		select *
+		from product
+		where productno = #{productno}
+	</select>
+
+	<insert id="insert">
+		insert into product (kinds, name, price, description, image)
+		values (#{kinds}, #{name}, #{price}, #{description}, #{image})
+	</insert>
+	
+	<update id="update">
+		update product
+		set kinds = #{kinds},
+		name = #{name},
+		price = #{price}
+		description = #{description},
+		image = #{image},
+		where productno = #{productno}
+	</update>
+	
+	<delete id="delete">
+		delete
+		from product
+		where productno = #{productno};
+	</delete>
+	
+</mapper>
