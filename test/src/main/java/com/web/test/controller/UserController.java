@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -52,16 +53,22 @@ public class UserController {
 	@Autowired
 	private EmailSender emailSender;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	@PostMapping("login")
 	@ApiOperation(value = "로그인")
 	public Object login(@RequestBody User user, HttpServletResponse response) {
-		User userinfo = userService.login(user);
+		User userinfo = userService.getUserById(user.getId());
 		String jwt = jwtUtil.createToken(user);
 		logger.debug("login");
 		if (userinfo != null) {
-			response.setHeader("Token", jwt);
-			response.setHeader("Access-Control-Expose-Headers", "Token");
-			return new ResponseEntity<User>(userinfo, HttpStatus.OK);
+			if (passwordEncoder.matches(user.getPw(), userinfo.getPw())) {
+				response.setHeader("Token", jwt);
+				response.setHeader("Access-Control-Expose-Headers", "Token");
+				return new ResponseEntity<User>(userinfo, HttpStatus.OK);				
+			}
+			return new ResponseEntity<String>(FAIL, HttpStatus.BAD_REQUEST);				
 		}
 		return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
 	}
@@ -75,6 +82,8 @@ public class UserController {
 		if (check != null) {
 			return new ResponseEntity<String>(FAIL, HttpStatus.BAD_REQUEST);
 		}
+		String encode = passwordEncoder.encode(user.getPw());
+		user.setPw(encode);
 		if (userService.insert(user)) {
 			return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
 		}
@@ -91,6 +100,8 @@ public class UserController {
 	@PutMapping("{userno}")
 	@ApiOperation(value = "회원정보 수정")
 	public Object updateUser(@RequestBody User user) {
+		String encode = passwordEncoder.encode(user.getPw());
+		user.setPw(encode);
 		if (userService.update(user)) {
 			User userinfo = userService.getUserByUserno(user.getUserno());
 			return new ResponseEntity<User>(userinfo, HttpStatus.OK);
@@ -105,7 +116,8 @@ public class UserController {
 		Random rand = new Random();
 		for (int i = 0; i < 6; i++)
 			tmp += Integer.toString(rand.nextInt(10));
-		user.setPw(tmp);
+		String encode = passwordEncoder.encode(tmp);
+		user.setPw(encode);
 		if (userService.resetPw(user)) {
 			Email email = new Email();
 			email.setSubject("[test] 임시 비밀번호가 발급되었습니다.");
