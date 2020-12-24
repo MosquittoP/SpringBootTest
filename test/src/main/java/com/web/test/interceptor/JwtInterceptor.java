@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.web.test.config.JwtUtil;
+import com.web.test.component.JwtUtil;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

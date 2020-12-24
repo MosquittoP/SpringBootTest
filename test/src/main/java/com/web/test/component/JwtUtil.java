@@ -1,4 +1,4 @@
-package com.web.test.config;
+package com.web.test.component;
 
 import java.security.Key;
 

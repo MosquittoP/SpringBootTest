@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.web.test.config.BasicResponse;
-import com.web.test.config.EmailSender;
-import com.web.test.config.JwtUtil;
+import com.web.test.component.EmailSender;
+import com.web.test.component.JwtUtil;
 import com.web.test.model.Email;
 import com.web.test.model.User;
 import com.web.test.service.UserService;
