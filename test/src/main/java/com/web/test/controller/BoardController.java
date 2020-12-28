@@ -6,14 +6,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -23,9 +23,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -245,43 +247,26 @@ public class BoardController {
 	
 	@GetMapping("download")
 	@ApiOperation(value = "게시글 파일 다운로드")
-	public Object downloadBoard(HttpServletResponse response) {
+	public ResponseEntity<Resource> downloadBoard(HttpServletResponse response) {
 		logger.debug("downloadBoard");
 		File file = new File("board.xlsx");
+		HttpHeaders header = new HttpHeaders();
+		Resource rs = null;
 		if (file.exists()) {
-			InputStream inp = null;
 			try {
-				inp = new FileInputStream(file);
-				try {
-					workbook = new XSSFWorkbook(inp);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-//			response.setContentType("application/msexcel");
-//			response.setHeader("Content-Type", "application/octet-stream");
-			response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-			response.setContentLength((int) file.length());
-			response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
-			try {
-				FileCopyUtils.copy(inp, response.getOutputStream());
-				response.flushBuffer();
+				String type = Files.probeContentType(Paths.get(file.getAbsolutePath()));
+				System.out.println(type);
+				if (type == null)
+					type = "octet-stream";
+				rs = new UrlResource(file.toURI());
+				header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + rs.getFilename() + "\"");
+				header.setCacheControl("no-cache");
+				header.setContentType(MediaType.parseMediaType(type));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-//			try {
-//				response.setHeader("Content-Disposition", "attachment; filename=\"" + java.net.URLEncoder.encode(file.getName(), "UTF-8") + "\";charset=\"UTF-8\"");
-//			} catch (UnsupportedEncodingException e) {
-//				e.printStackTrace();
-//			}
-//			response.setHeader("Content-Disposition", "JSP Generated Data");
-//			response.setHeader("Content-Type", "application/vnd.ms-excel");
-//			response.setHeader("Content-Transfer-Encoding", "binary");
-			return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
 		}
-		return new ResponseEntity<String>(FAIL, HttpStatus.NOT_FOUND);
+		return new ResponseEntity<Resource>(rs, header, HttpStatus.OK);
 	}
 	
 }
