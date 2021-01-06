@@ -3,6 +3,7 @@ package com.web.test.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.web.test.interceptor.JwtInterceptor;
@@ -15,6 +16,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(jwtInterceptor).addPathPatterns("user");
+	}
+	
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/image/**").addResourceLocations("file:///Users/cheil/git/SpringBootTest/test/image/");
 	}
 	
 }

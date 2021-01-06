@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.filechooser.FileSystemView;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,8 @@ public class ProductController {
 	private static final Logger logger = LoggerFactory.getLogger(BoardController.class);
 	private static final String SUCCESS = "success";
 	private static final String FAIL = "fail";
+	private static final String path = "";
+//	private static final String path = "image";
 	
 	@Autowired
 	ProductService productService;
@@ -47,8 +50,9 @@ public class ProductController {
 		List<Product> list = productService.getProduct();
 		if (list != null) {
 			for (Product p : list)
-				p.setImage("image/" + p.getImage());
+				p.setImage(p.getImage());
 		}
+		System.out.println(FileSystemView.getFileSystemView().getHomeDirectory().toString());
 		return new ResponseEntity<List<Product>>(list, HttpStatus.OK);
 	}
 	
@@ -68,7 +72,7 @@ public class ProductController {
 			time += System.currentTimeMillis();
 			String filename = file.getOriginalFilename();
 			try {
-				file.transferTo(new File("image/" + time + filename));
+				file.transferTo(new File(path + time + filename));
 			} catch (IllegalStateException | IOException e) {
 				e.printStackTrace();
 			}
@@ -105,13 +109,13 @@ public class ProductController {
 			time += System.currentTimeMillis();
 			String filename = file.getOriginalFilename();
 			try {
-				file.transferTo(new File("image/" + time + filename));
+				file.transferTo(new File(path + time + filename));
 			} catch (IllegalStateException | IOException e) {
 				e.printStackTrace();
 			}
 			product.setImage(time + filename);
 			if (!nowProduct.getImage().equals("null.png")) {
-				File nowFile = new File("image/" + nowProduct.getImage());
+				File nowFile = new File(path + nowProduct.getImage());
 				if (nowFile.exists())
 					nowFile.delete();
 			}
@@ -119,7 +123,7 @@ public class ProductController {
 		else {
 			product.setImage("null.png");
 			if (!nowProduct.getImage().equals("null.png")) {
-				File nowFile = new File("image/" + nowProduct.getImage());
+				File nowFile = new File(path + nowProduct.getImage());
 				if (nowFile.exists())
 					nowFile.delete();
 			}
@@ -135,7 +139,7 @@ public class ProductController {
 		logger.debug("deleteProduct");
 		Product product = productService.getProductByProductno(productno);
 		if (!product.getImage().equals("null.png")) {
-			File file = new File("image/" + product.getImage());
+			File file = new File(path + product.getImage());
 			if (file.exists())
 				file.delete();
 		}
