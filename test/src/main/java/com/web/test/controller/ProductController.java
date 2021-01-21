@@ -37,8 +37,7 @@ public class ProductController {
 	private static final Logger logger = LoggerFactory.getLogger(BoardController.class);
 	private static final String SUCCESS = "success";
 	private static final String FAIL = "fail";
-	private static final String path = "";
-//	private static final String path = "image";
+	private static final String path = "image";
 	
 	@Autowired
 	ProductService productService;
