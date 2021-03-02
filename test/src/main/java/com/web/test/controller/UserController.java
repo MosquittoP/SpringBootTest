@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,7 @@ import com.web.test.component.EmailSender;
 import com.web.test.component.JwtUtil;
 import com.web.test.model.Email;
 import com.web.test.model.User;
+import com.web.test.service.EmailService;
 import com.web.test.service.UserService;
 
 import io.swagger.annotations.ApiOperation;
@@ -37,6 +39,9 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private EmailService emailService;
 	
 	@Autowired
 	private JwtUtil jwtUtil;
@@ -113,10 +118,20 @@ public class UserController {
 			Email email = new Email();
 			email.setSubject("[test] 임시 비밀번호가 발급되었습니다.");
 			email.setReceiver(user.getEmail());
-			email.setContent("<html><body><p>안녕하세요.</p><p>" + user.getId() + "님의 임시 비밀번호는</p><p><strong>" + tmp + "</strong>입니다.</p></body></html>");
+			email.setContent("<html><body><p>안녕하세요.</p><p>" + user.getId() + "님의 임시 비밀번호는</p><p><strong>" + tmp + "</strong>입니다.</p>"
+					+ "<img width=\"0\" height=\"0\" src=\"http://localhost/user/openmail?pw='" + tmp + "'\"></body></html>");			
 			emailSender.sendEmail(email);
+			emailService.insert(email);
 			return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
 		}
+		else
+			return new ResponseEntity<String>(FAIL, HttpStatus.BAD_REQUEST);
+	}
+	
+	@GetMapping("openmail")
+	public Object openCheck(String pw) {
+		if(emailService.open(pw))
+			return new ResponseEntity<String>(SUCCESS, HttpStatus.OK);
 		else
 			return new ResponseEntity<String>(FAIL, HttpStatus.BAD_REQUEST);
 	}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.web.test.repo.EmailDAO">
+	
+	<select id="getEmail" resultType="Email">
+		select *
+		from email
+	</select>
+	
+	<select id="getEmailByEmailno" resultType="Email">
+		select *
+		from email
+		where emailno = #{emailno}
+	</select>
+
+	<insert id="insert">
+		insert into email (subject, content, receiver, open)
+		values (#{subject}, #{content}, #{receiver}, #{open})
+	</insert>
+	
+	<update id="open">
+		update email
+		set open = 1
+		where content like CONCAT ('%',#{pw},'%')
+	</update>
+	
+</mapper>

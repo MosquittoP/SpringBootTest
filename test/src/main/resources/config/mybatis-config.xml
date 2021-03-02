@@ -10,5 +10,6 @@
 		<mapper resource="mappers/user.xml" />
 		<mapper resource="mappers/board.xml" />
 		<mapper resource="mappers/product.xml" />
+		<mapper resource="mappers/email.xml" />
 	</mappers>
 </configuration>
